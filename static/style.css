@@ -1,0 +1,42 @@
+* {
+	box-sizing:border-box;
+	margin:0px;
+	padding:0px;
+}
+html {
+	min-height:100%;
+	overflow-x:hidden;
+}
+body {
+	display:flex;
+	flex-flow:column nowrap;
+	align-items: center;
+	background-color: #212429;
+	color:#e4e4e4;
+	gap:15px;
+	font-family: "Fira Sans Condensed", sans-serif;
+	padding:20px;
+	&>h1 {
+
+	}
+}
+
+a {
+	color:inherit;
+	text-decoration-style: dotted;
+	&:hover {
+		text-decoration-style:solid;
+	}
+}
+
+header {
+
+}
+
+main {
+	
+}
+
+footer {
+
+}
