@@ -38,6 +38,8 @@ while(true) {
 			responseTimeWarning		: config.responseTimeWarning,
 		};
 
+		status.ui = [];
+
 		let siteIds = [];
 		for(let site of config.sites) {
 			config.verbose && console.log(`⏳ Site: ${site.name || site.id}`);
@@ -50,8 +52,10 @@ while(true) {
 			let site_ = status.sites[siteId]; // shortcut ref
 			site_.name = site.name || site_.name;
 			site_.endpoints = site_.endpoints || {};
+
+			let endpointIds = [];
+			status.ui.push([siteId, endpointIds]);
 			try {
-				let endpointIds = [];
 				for(let endpoint of site.endpoints) {
 					let endpointStatus = {
 						t	: Date.now(),// time
