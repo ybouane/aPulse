@@ -1,9 +1,5 @@
-const engine = new liquidjs.Liquid();
 document.addEventListener("DOMContentLoaded", async () => {
 	let $main = document.querySelector('main');
-	const templateLiquid = document.querySelector("template#site").innerHTML;
-	const template = await engine.parse(templateLiquid);
-	
 	const refreshStatus = async () => {
 		try {
 			const response = await fetch('/status.json');

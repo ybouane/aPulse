@@ -1,6 +1,7 @@
 {
   "name": "pulse",
   "version": "1.0.0",
+  "type": "module",
   "description": "A one-file NodeJS server status monitoring tool.",
   "main": "server.js",
   "scripts": {
@@ -10,7 +11,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fastify": "^5.0.0",
-    "liquidjs": "^10.17.0"
+    "fastify": "^5.0.0"
   }
 }
