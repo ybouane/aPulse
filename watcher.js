@@ -71,7 +71,10 @@ while(true) {
 					try {
 						performance.clearResourceTimings();
 						start = performance.now();
-						let response = await fetch(endpoint.url, endpoint.request, { signal: AbortSignal.timeout(config.timeout) });
+						let response = await fetch(endpoint.url, {
+							signal: AbortSignal.timeout(config.timeout),
+							...endpoint.request,
+						});
 						let content = await response.text();
 						await delay(0); // Ensures that the entry was registered.
 						let perf = performance.getEntriesByType('resource')[0];
