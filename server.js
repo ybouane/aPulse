@@ -1,58 +1,141 @@
-import config from './config.json';
-import Fastify from 'fastify';
-import { Liquid } from 'liquidjs';
+import config from './config.js';
 import fs from 'fs/promises';
 
-const fastify = Fastify({ logger: true });
-const liquidEngine = new Liquid();
+const statusFile = './static/status.json';
 
-// Define /logs.json endpoint
-fastify.get('/logs.json', async (request, reply) => {
-	const logs = [
-		{ message: 'Server started', timestamp: '2024-10-08T10:00:00Z' },
-		{ message: 'Endpoint /logs.json accessed', timestamp: '2024-10-08T10:05:00Z' }
-	];
-	return reply.send(logs);
-});
-
-// Define / endpoint to parse and render Liquid template
-fastify.get('/data.json', async (request, reply) => {
-	try {
-		const templateContent = await fs.readFile('./template.liquid', 'utf-8');
-		const htmlContent = await liquidEngine.parseAndRender(templateContent, {  });
-		reply.type('text/html').send(htmlContent);
-	} catch (error) {
-		reply.code(500).send({ error: 'Error rendering template' });
+const delay  = async t=>new Promise(r=>setTimeout(r, t));
+const handlize = s=>s.toLowerCase().replace(/[^a-z0-9]/, ' ').trim().replace(/\s{2,}/g, '-');
+const checkContent = async (content, criterion) => {
+	if(typeof criterion=='string') {
+		return content.includes(criterion);
+	} else if(critieria instanceof RegExp) {
+		return content.match(criterion);
+	} else if(typeof criterion=='function') {
+		if(criterion.constructor.name == 'AsyncFunction') {
+			return criterion(content);
+		} else {
+			return await criterion(content);
+		}
+	} else {
+		throw new Error('Invalid content check criterion.')
 	}
-});
+};
 
-// Define /static/* endpoint to serve static files if they exist
-fastify.get('/static/*', async (request, reply) => {
+while(true) {
+	config.verbose && console.log('🔄 Pulse');
+	let startPulse = Date.now();
+	let status;
 	try {
-		const filePath = path.join(process.cwd(), request.params['*']);
-		const fileExt = path.extname(filePath).toLowerCase();
-		const fileContent = await fs.readFile(filePath);
-		reply.type({
-			".html": "text/html",
-			".css": "text/css",
-			".js": "application/javascript",
-			".json": "application/json",
-			".png": "image/png",
-			".jpg": "image/jpeg",
-			".jpeg": "image/jpeg",
-			".gif": "image/gif",
-			".svg": "image/svg+xml"
-		}[filePath] || 'application/octet-stream').send(fileContent);
-	} catch (error) {
-		reply.code(404).send({ error: 'File not found' });
-	}
-});
+		try {
+			status = JSON.parse((await fs.readFile(statusFile)).toString()); // We re-read the file each time in case it was manually modified.
+		} catch(e) {console.error(`Could not find status.json file [${statusFile}], will create it.`)}
+		status = status || {};
+		status.sites = status.sites || {};
+		status.lastPulse = startPulse;
+		status.config = {
+			interval				: config.interval,
+			responseTimeGood		: config.responseTimeGood,
+			responseTimeWarning		: config.responseTimeWarning,
+		};
 
-// Start the Fastify server
-try {
-	await fastify.listen({ port: config.port });
-	console.log('Pulse Running on PORT '+config.port);
-} catch (err) {
-	fastify.log.error(err);
-	process.exit(1);
+		let siteIds = [];
+		for(let site of config.sites) {
+			config.verbose && console.log(`Site: ${site.name || site.id}`);
+			let siteId = site.id || handlize(site.name) || 'site';
+			let i = 1; let siteId_ = siteId;
+			while(siteIds.includes(siteId)) {siteId = siteId_+'-'+(++i)} // Ensure a unique site id
+			siteIds.push(siteId);
+
+			status.sites[siteId] = status.sites[siteId] || {};
+			let site_ = status.sites[siteId]; // shortcut ref
+			site_.name = site.name || site_.name;
+			site_.endpoints = site_.endpoints || {};
+			try {
+				let endpointIds = [];
+				for(let endpoint of site.endpoints) {
+					let endpointStatus = {
+						t	: Date.now(),// time
+					};
+					config.verbose && console.log(`Fetching endpoint: ${endpoint.url}`);
+					let endpointId = endpoint.id || handlize(endpoint.name) || 'endpoint';
+					let i = 1; let endpointId_ = endpointId;
+					while(endpointIds.includes(endpointId)) {endpointId = endpointId_+'-'+(++i)} // Ensure a unique endpoint id
+					endpointIds.push(endpointId);
+
+					site_.endpoints[endpointId] = site_.endpoints[endpointId] || {};
+					let endpoint_ = site_.endpoints[endpointId]; // shortcut ref
+					endpoint_.name = endpoint.name || endpoint_.name;
+					endpoint_.logs = endpoint_.logs || [];
+					let start;
+					
+					try {
+						performance.clearResourceTimings();
+						start = performance.now();
+						let response = await fetch(endpoint.url, endpoint.request, { signal: AbortSignal.timeout(config.timeout) });
+						let content = await response.text();
+						await delay(0); // Ensures that the entry was registered.
+						let perf = performance.getEntriesByType('resource');
+						if(perf) {
+							endpoint_.dur = perf.responseEnd - perf.startTime; // total request duration
+							//endpoint_.dns = perf.domainLookupEnd - perf.domainLookupStart;
+							//endpoint_.tcp = perf.connectEnd - perf.connectStart;
+							endpoint_.ttfb = perf.responseStart - perf.requestStart; // time to first byte
+							endpoint_.dll = perf.responseEnd - perf.responseStart; // time for content download
+						} else { // backup in case entry was not registered
+							endpoint_.dur = performance.now() - start;
+							endpoint_.ttfb = 0;
+							endpoint_.dll = 0;
+							config.verbose && console.log('Could not use PerformanceResourceTiming API to measure request.')
+						}
+						if(!endpoint.validStatus && !response.ok) {
+							endpointStatus.err = `HTTP Status ${response.status}: ${response.statusText}`;
+							continue;
+						} else if((Array.isArray(endpoint.validStatus) && !endpoint.validStatus.includes(response.status)) || (!Array.isArray(endpoint.validStatus) && endpoint.validStatus!=response.status)) {
+							endpointStatus.err = `HTTP Status ${response.status}: ${response.statusText}`;
+							continue;
+						}
+						if(endpoint.mustFind && !await checkContent(content, endpoint.mustFind)) {
+							endpointStatus.err = '"mustFind" check failed';
+							continue;
+						}
+						if(endpoint.mustNotFind && await checkContent(content, endpoint.mustNotFind)) {
+							endpointStatus.err = '"mustNotFind" check failed';
+							continue;
+						}
+					} catch(e) {
+						endpointStatus.err = String(e);
+						if(!endpoint_.dur) {
+							endpoint_.dur = performance.now() - start;
+							endpoint_.ttfb = 0;
+							endpoint_.dll = 0;
+						}
+					} finally {
+						endpoint_.logs.push(endpointStatus);
+						if(endpoint_.logs.length > config.logsMaxDatapoints) // Remove old datapoints
+							endpoint_.logs = endppoint_.logs.splice(0, endpoint_.logs.length - config.logsMaxDatapoints);
+						if(config.verbose) {
+							if(endpointStatus.err) {
+								console.log(`🔥 ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.dur.toFixed(2)}ms]`);
+								console.log(`→ ${endpointStatus.err}`);
+							} else {
+								let emoji = '🟢';
+								if(endpointStatus.dur>config.responseTimeWarning)
+									emoji = '🟥';
+								else if(endpointStatus.dur>config.responseTimeGood)
+									emoji = '🔶';
+								console.log(`${emoji} ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.dur.toFixed(2)}ms]`);
+							}
+						}
+					}
+				}
+			} catch(e) {
+				console.error(e);
+			}
+		}
+		await fs.writeFile(statusFile, JSON.stringify(status, undefined, config.readableStatusJson?2:undefined));
+	} catch(e) {
+		console.error(e);
+	}
+	config.verbose && console.log('✅ Done');
+	await delay(config.interval * 60_0000 - (Date.now() - startPulse));
 }
