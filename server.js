@@ -56,7 +56,7 @@ while(true) {
 					let endpointStatus = {
 						t	: Date.now(),// time
 					};
-					config.verbose && console.log(`Fetching endpoint: ${endpoint.url}`);
+					config.verbose && console.log(`\tFetching endpoint: ${endpoint.url}`);
 					let endpointId = endpoint.id || handlize(endpoint.name) || 'endpoint';
 					let i = 1; let endpointId_ = endpointId;
 					while(endpointIds.includes(endpointId)) {endpointId = endpointId_+'-'+(++i)} // Ensure a unique endpoint id
@@ -85,7 +85,7 @@ while(true) {
 							endpointStatus.dur = performance.now() - start;
 							endpointStatus.ttfb = endpointStatus.dur;
 							endpointStatus.dll = 0;
-							config.verbose && console.log('Could not use PerformanceResourceTiming API to measure request.')
+							config.verbose && console.log(`\tCould not use PerformanceResourceTiming API to measure request.`);
 						}
 						if(!endpoint.validStatus && !response.ok) {
 							endpointStatus.err = `HTTP Status ${response.status}: ${response.statusText}`;
@@ -115,15 +115,15 @@ while(true) {
 							endpoint_.logs = endppoint_.logs.splice(0, endpoint_.logs.length - config.logsMaxDatapoints);
 						if(config.verbose) {
 							if(endpointStatus.err) {
-								console.log(`🔥 ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
-								console.log(`→ ${endpointStatus.err}`);
+								console.log(`\t🔥 ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
+								console.log(`\t→ ${endpointStatus.err}`);
 							} else {
 								let emoji = '🟢';
 								if(endpointStatus.ttfb>config.responseTimeWarning)
 									emoji = '🟥';
 								else if(endpointStatus.ttfb>config.responseTimeGood)
 									emoji = '🔶';
-								console.log(`${emoji} ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
+								console.log(`\t${emoji} ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
 							}
 						}
 					}
