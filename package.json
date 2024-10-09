@@ -1,0 +1,16 @@
+{
+  "name": "pulse",
+  "version": "1.0.0",
+  "description": "A one-file NodeJS server status monitoring tool.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fastify": "^5.0.0",
+    "liquidjs": "^10.17.0"
+  }
+}
