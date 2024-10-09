@@ -8,7 +8,7 @@ const handlize = s=>s.toLowerCase().replace(/[^a-z0-9]/, ' ').trim().replace(/\s
 const checkContent = async (content, criterion) => {
 	if(typeof criterion=='string') {
 		return content.includes(criterion);
-	} else if(critieria instanceof RegExp) {
+	} else if(criterion instanceof RegExp) {
 		return content.match(criterion);
 	} else if(typeof criterion=='function') {
 		if(criterion.constructor.name == 'AsyncFunction') {
@@ -40,7 +40,7 @@ while(true) {
 
 		let siteIds = [];
 		for(let site of config.sites) {
-			config.verbose && console.log(`Site: ${site.name || site.id}`);
+			config.verbose && console.log(`⏳ Site: ${site.name || site.id}`);
 			let siteId = site.id || handlize(site.name) || 'site';
 			let i = 1; let siteId_ = siteId;
 			while(siteIds.includes(siteId)) {siteId = siteId_+'-'+(++i)} // Ensure a unique site id
@@ -74,17 +74,17 @@ while(true) {
 						let response = await fetch(endpoint.url, endpoint.request, { signal: AbortSignal.timeout(config.timeout) });
 						let content = await response.text();
 						await delay(0); // Ensures that the entry was registered.
-						let perf = performance.getEntriesByType('resource');
+						let perf = performance.getEntriesByType('resource')[0];
 						if(perf) {
-							endpoint_.dur = perf.responseEnd - perf.startTime; // total request duration
-							//endpoint_.dns = perf.domainLookupEnd - perf.domainLookupStart;
-							//endpoint_.tcp = perf.connectEnd - perf.connectStart;
-							endpoint_.ttfb = perf.responseStart - perf.requestStart; // time to first byte
-							endpoint_.dll = perf.responseEnd - perf.responseStart; // time for content download
+							endpointStatus.dur = perf.responseEnd - perf.startTime; // total request duration
+							//endpointStatus.dns = perf.domainLookupEnd - perf.domainLookupStart;
+							//endpointStatus.tcp = perf.connectEnd - perf.connectStart;
+							endpointStatus.ttfb = perf.responseStart - perf.requestStart; // time to first byte
+							endpointStatus.dll = perf.responseEnd - perf.responseStart; // time for content download
 						} else { // backup in case entry was not registered
-							endpoint_.dur = performance.now() - start;
-							endpoint_.ttfb = 0;
-							endpoint_.dll = 0;
+							endpointStatus.dur = performance.now() - start;
+							endpointStatus.ttfb = endpointStatus.dur;
+							endpointStatus.dll = 0;
 							config.verbose && console.log('Could not use PerformanceResourceTiming API to measure request.')
 						}
 						if(!endpoint.validStatus && !response.ok) {
@@ -104,10 +104,10 @@ while(true) {
 						}
 					} catch(e) {
 						endpointStatus.err = String(e);
-						if(!endpoint_.dur) {
-							endpoint_.dur = performance.now() - start;
-							endpoint_.ttfb = 0;
-							endpoint_.dll = 0;
+						if(!endpointStatus.dur) {
+							endpointStatus.dur = performance.now() - start;
+							endpointStatus.ttfb = endpointStatus.dur;
+							endpointStatus.dll = 0;
 						}
 					} finally {
 						endpoint_.logs.push(endpointStatus);
@@ -115,15 +115,15 @@ while(true) {
 							endpoint_.logs = endppoint_.logs.splice(0, endpoint_.logs.length - config.logsMaxDatapoints);
 						if(config.verbose) {
 							if(endpointStatus.err) {
-								console.log(`🔥 ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.dur.toFixed(2)}ms]`);
+								console.log(`🔥 ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
 								console.log(`→ ${endpointStatus.err}`);
 							} else {
 								let emoji = '🟢';
-								if(endpointStatus.dur>config.responseTimeWarning)
+								if(endpointStatus.ttfb>config.responseTimeWarning)
 									emoji = '🟥';
-								else if(endpointStatus.dur>config.responseTimeGood)
+								else if(endpointStatus.ttfb>config.responseTimeGood)
 									emoji = '🔶';
-								console.log(`${emoji} ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.dur.toFixed(2)}ms]`);
+								console.log(`${emoji} ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
 							}
 						}
 					}
