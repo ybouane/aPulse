@@ -137,5 +137,5 @@ while(true) {
 		console.error(e);
 	}
 	config.verbose && console.log('✅ Done');
-	await delay(config.interval * 60_0000 - (Date.now() - startPulse));
+	await delay(config.interval * 60_000 - (Date.now() - startPulse));
 }
