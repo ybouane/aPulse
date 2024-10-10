@@ -1,5 +1,6 @@
 let config;
 let lastPulse = 0;
+const setError = (text)=>{document.querySelector('error-notice').innerText = text;};
 document.addEventListener("DOMContentLoaded", async () => {
 	let $main = document.querySelector('main');
 	const refreshStatus = async () => {
@@ -8,6 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			if (!response.ok) {
 				throw new Error(`Error fetching status.json: ${response.statusText}`);
 			}
+			setError(''); // Clear errors
 			const status = await response.json();
 			$main.innerHTML = '';
 			config = status.config;
@@ -64,13 +66,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 						let tcp = Math.max(...endpointPoints.map(p=>p[i]?.tcp).filter(p=>p));
 						combinedLogs.push({t, err, ttfb, dur, dns, tcp});
 					}
-					console.log(combinedLogs);
 					$statusBar.setLogs(combinedLogs);
 					$site.querySelector('h1').after($statusBar);
 				}
 			}
 		} catch (error) {
-			console.error("Error loading server status:", error);
+			setError("Error loading server status:", error);
 		}
 	};
 	refreshStatus();
@@ -104,8 +105,12 @@ class StatusBar extends HTMLElement {
 		this.innerHTML = '';
 		this.logs = logs;
 		let points = [];
+		let lastDate = lastPulse;
+		if(lastPulse < (Date.now() - config.interval*60_000 - 20_000 )) { // Detect when last pulse is too long ago, give grace period of 20sec -> Watcher is probably down, use Date.now
+			lastDate = Date.now();
+		}
 		for(let i=config.nDataPoints-1;i>=0;i--) {
-			let date = lastPulse - i * config.interval * 60_000;
+			let date = lastDate - i * config.interval * 60_000;
 			let point = findClosestPoint(logs, date, config.interval * 60_000/2);
 			points.push(point);
 			const $entry = document.createElement('status-bar-entry');

@@ -1,4 +1,3 @@
-import config from './config.js';
 import fs from 'fs/promises';
 import {watchFile} from 'fs';
 let config = (await import('./config.js')).default;
@@ -136,7 +135,6 @@ while(true) {
 		} catch(e) {console.error(`Could not find status.json file [${statusFile}], will create it.`)}
 		status = status || {};
 		status.sites = status.sites || {};
-		status.lastPulse = startPulse;
 		status.config = {
 			interval				: config.interval,
 			nDataPoints				: config.nDataPoints,
@@ -278,6 +276,7 @@ while(true) {
 			}
 			config.verbose && console.log(' ');//New line
 		}
+		status.lastPulse = Date.now();
 		await fs.writeFile(statusFile, JSON.stringify(status, undefined, config.readableStatusJson?2:undefined));
 	} catch(e) {
 		console.error(e);
