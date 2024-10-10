@@ -8,6 +8,8 @@ const handlize = s=>s.toLowerCase().replace(/[^a-z0-9]/, ' ').trim().replace(/\s
 const checkContent = async (content, criterion) => {
 	if(typeof criterion=='string') {
 		return content.includes(criterion);
+	} else if(Array.isArray(criterion)) {
+		return criterion.some(c=>content.includes(c));
 	} else if(criterion instanceof RegExp) {
 		return !!content.match(criterion);
 	} else if(typeof criterion=='function') {

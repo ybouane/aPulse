@@ -41,8 +41,8 @@ export default {
 					request			: { // fetch options
 						method: 'GET',
 					},
-					mustFind		: 'Feeling Lucky', // String | Regex | Function | AsyncFunction
-					mustNotFind		: /Page not found/i, // String | Regex | Function | AsyncFunction
+					mustFind		: 'Feeling Lucky', // String | Array | Regex | Function | AsyncFunction
+					mustNotFind		: /Page not found/i, // String | Array | Regex | Function | AsyncFunction
 					customCheck		: async (content, response)=>{return true;}, // Function | AsyncFunction -> Run your own custom checks return false in case of errors
 					validStatus		: [200], // Which http status should be considered non errors [defaults to 200-299]
 				}
