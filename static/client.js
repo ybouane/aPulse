@@ -88,9 +88,9 @@ class StatusBar extends HTMLElement {
 			$entry.setAttribute('tabindex', 0);
 			if(point) {
 				$entry.innerHTML = `<div>
-	<strong>${formatDate(point.t)}</strong>
-	<em></em>
-</div>`;
+					<strong>${formatDate(point.t)}</strong>
+					<em></em>
+				</div>`;
 				if(point.err) {
 					$entry.setAttribute('data-status', 'outage');
 					$entry.querySelector('em').innerText = point.err;
@@ -103,7 +103,7 @@ class StatusBar extends HTMLElement {
 						$entry.setAttribute('data-status', 'healthy');
 					}
 				}
-				$entry.querySelector('em').innerText = point.ttfb.toFixed(2)+'ms';
+				$entry.querySelector('em').innerText = `Latency: ${point.ttfb.toFixed(2)}ms`;
 			} else {
 				$entry.setAttribute('data-status', 'none');
 				$entry.innerHTML = `<div><strong>No Data</strong></div>`;
