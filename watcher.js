@@ -175,6 +175,8 @@ while(true) {
 					site_.endpoints[endpointId] = site_.endpoints[endpointId] || {};
 					let endpoint_ = site_.endpoints[endpointId]; // shortcut ref
 					endpoint_.name = endpoint.name || endpoint_.name;
+					if(endpoint.link!==false)
+						endpoint_.link = endpoint.link || endpoint.url;
 					endpoint_.logs = endpoint_.logs || [];
 					let start;
 					
@@ -243,7 +245,7 @@ while(true) {
 										`🔥 ERROR\n`+
 										`${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]\n`+
 										`→ ${endpointStatus.err}`+
-										`\n→ ${endpoint.link || endpoint.url}\n`
+										(endpoint.link!==false?`\n→ ${endpoint.link || endpoint.url}`:'')
 									);
 								}
 							} catch(e) {console.error(e);}
@@ -264,7 +266,7 @@ while(true) {
 									/*await*/ sendNotification( // Don't await to prevent blocking/delaying next pulse
 										`🟥 High Latency\n`+
 										`${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]\n`+
-										`\n→ ${endpoint.link || endpoint.url}\n`
+										(endpoint.link!==false?`\n→ ${endpoint.link || endpoint.url}`:'')
 									);
 								}
 							} catch(e) {console.error(e);}

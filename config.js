@@ -35,16 +35,16 @@ export default {
 			endpoints		: [
 				{
 					id				: 'homepage', // optional
-					name			: 'Homepage',
-					link			: 'https://www.google.com', // optional (for notifications and dashboard only), [defaults to endpoint.url]
-					url				: 'https://www.google.com',
-					request			: { // fetch options
+					name			: 'Homepage', // optional
+					link			: 'https://www.google.com', // optional, for notifications and dashboard only, [defaults to endpoint.url], can be disabled by settig it to false
+					url				: 'https://www.google.com', // required
+					request			: { // optional, fetch options
 						method: 'GET',
 					},
-					mustFind		: 'Feeling Lucky', // String | Array | Regex | Function | AsyncFunction
-					mustNotFind		: /Page not found/i, // String | Array | Regex | Function | AsyncFunction
-					customCheck		: async (content, response)=>{return true;}, // Function | AsyncFunction -> Run your own custom checks return false in case of errors
-					validStatus		: [200], // Which http status should be considered non errors [defaults to 200-299]
+					mustFind		: 'Feeling Lucky', // optional, String | Array | Regex | Function | AsyncFunction
+					mustNotFind		: /Page not found/i, // optional, String | Array | Regex | Function | AsyncFunction
+					customCheck		: async (content, response)=>{return true;}, // optional, Function | AsyncFunction -> Run your own custom checks return false in case of errors
+					validStatus		: [200], // optional, Which http status should be considered non errors [defaults to 200-299]
 				}
 			]
 		}

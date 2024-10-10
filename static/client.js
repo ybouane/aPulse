@@ -37,6 +37,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 					$endpointName = document.createElement('h3');
 					$endpointName.innerText = endpoint.name;
+					if(endpoint.link) {
+						let $link = document.createElement('a');
+						$link.href = endpoint.link;
+						$link.target = '_blank';
+						$link.innerHTML = '<span class="icon">open_in_new</span>';
+						$endpointName.append($link);
+					}
 					$endpoint.append($endpointName);
 
 					let $statusBarEndpoint = document.createElement('status-bar');
