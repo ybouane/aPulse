@@ -152,8 +152,8 @@ while(true) {
 									if(config.telegram?.botToken && config.telegram?.chatId) {
 										/*await*/ sendTelegramMessage(config.telegram.botToken, config.telegram.chatId,
 											`🔥 ERROR\n`+
-											`${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]\n`
-											`→ ${endpointStatus.err}`
+											`${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]\n`+
+											`→ ${endpointStatus.err}`+
 											`\n→ ${endpoint.link || endpoint.url}\n`
 										);
 									}
