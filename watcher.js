@@ -20,6 +20,23 @@ const checkContent = async (content, criterion) => {
 		throw new Error('Invalid content check criterion.')
 	}
 };
+const sendTelegramMessage = async (botToken, chatId, text) => {
+	const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+	const response = await fetch(url, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			chat_id: chatId,
+			text: text,
+		}),
+	});
+	if (!response.ok) {
+		throw new Error(`Failed to send message: ${response.statusText}`);
+	}
+	const data = await response.json();
+	return data;
+};
+  
 
 while(true) {
 	config.verbose && console.log('🔄 Pulse');
@@ -131,6 +148,16 @@ while(true) {
 							if(endpointStatus.err) {
 								console.log(`\t🔥 ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
 								console.log(`\t→ ${endpointStatus.err}`);
+								try {
+									if(config.telegram?.botToken && config.telegram?.chatId) {
+										/*await*/ sendTelegramMessage(config.telegram.botToken, config.telegram.chatId,
+											`🔥 ERROR\n`+
+											`${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]\n`
+											`→ ${endpointStatus.err}`
+											`\n→ ${endpoint.link || endpoint.url}\n`
+										);
+									}
+								} catch(e) {console.error(e);}
 							} else {
 								let emoji = '🟢';
 								if(endpointStatus.ttfb>config.responseTimeWarning)

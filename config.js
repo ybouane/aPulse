@@ -18,6 +18,7 @@ export default {
 				{
 					id				: 'homepage', // optional
 					name			: 'Homepage',
+					link			: 'https://www.google.com', // optional
 					url				: 'https://www.google.com',
 					request			: { // fetch options
 						method: 'GET',
