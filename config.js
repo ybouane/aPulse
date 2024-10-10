@@ -15,12 +15,12 @@ export default {
 					id				: 'homepage', // optional
 					name			: 'Homepage',
 					url				: 'https://www.google.com',
-					request			: {
+					request			: { // fetch options
 						method: 'GET',
 					},
 					mustFind		: 'Feeling Lucky', // String | Regex | Function | AsyncFunction
-					mustNotFind		: /not found/i,
-					followRedirects	: true,
+					mustNotFind		: /Page not found/i,
+					customCheck		: (content, response)=>{return true;},
 					validStatus		: [200],
 				}
 			]

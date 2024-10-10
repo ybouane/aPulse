@@ -9,12 +9,12 @@ const checkContent = async (content, criterion) => {
 	if(typeof criterion=='string') {
 		return content.includes(criterion);
 	} else if(criterion instanceof RegExp) {
-		return content.match(criterion);
+		return !!content.match(criterion);
 	} else if(typeof criterion=='function') {
 		if(criterion.constructor.name == 'AsyncFunction') {
-			return criterion(content);
+			return !!criterion(content);
 		} else {
-			return await criterion(content);
+			return !!await criterion(content);
 		}
 	} else {
 		throw new Error('Invalid content check criterion.')
@@ -85,16 +85,17 @@ while(true) {
 						let perf = performance.getEntriesByType('resource')[0];
 						if(perf) {
 							endpointStatus.dur = perf.responseEnd - perf.startTime; // total request duration
-							//endpointStatus.dns = perf.domainLookupEnd - perf.domainLookupStart;
-							//endpointStatus.tcp = perf.connectEnd - perf.connectStart;
-							endpointStatus.ttfb = perf.responseStart - perf.requestStart; // time to first byte
+							endpointStatus.dns = perf.domainLookupEnd - perf.domainLookupStart; // DNS Lookup
+							endpointStatus.tcp = perf.connectEnd - perf.connectStart; // TCP handshake time
+							endpointStatus.ttfb = perf.responseStart - perf.requestStart; // time to first byte -> Latency
 							endpointStatus.dll = perf.responseEnd - perf.responseStart; // time for content download
 						} else { // backup in case entry was not registered
 							endpointStatus.dur = performance.now() - start;
 							endpointStatus.ttfb = endpointStatus.dur;
-							endpointStatus.dll = 0;
 							config.verbose && console.log(`\tCould not use PerformanceResourceTiming API to measure request.`);
 						}
+
+						// HTTP Status Check
 						if(!endpoint.validStatus && !response.ok) {
 							endpointStatus.err = `HTTP Status ${response.status}: ${response.statusText}`;
 							continue;
@@ -102,6 +103,8 @@ while(true) {
 							endpointStatus.err = `HTTP Status ${response.status}: ${response.statusText}`;
 							continue;
 						}
+
+						// Content checks
 						if(endpoint.mustFind && !await checkContent(content, endpoint.mustFind)) {
 							endpointStatus.err = '"mustFind" check failed';
 							continue;
@@ -110,17 +113,20 @@ while(true) {
 							endpointStatus.err = '"mustNotFind" check failed';
 							continue;
 						}
+						if(endpoint.customCheck && typeof endpoint.customCheck == 'function' && !await Promise.resolve(endpoint.customCheck(content, response))) {
+							endpointStatus.err = '"customCheck" check failed';
+							continue;
+						}
 					} catch(e) {
 						endpointStatus.err = String(e);
 						if(!endpointStatus.dur) {
 							endpointStatus.dur = performance.now() - start;
 							endpointStatus.ttfb = endpointStatus.dur;
-							endpointStatus.dll = 0;
 						}
 					} finally {
 						endpoint_.logs.push(endpointStatus);
 						if(endpoint_.logs.length > config.logsMaxDatapoints) // Remove old datapoints
-							endpoint_.logs = endppoint_.logs.splice(0, endpoint_.logs.length - config.logsMaxDatapoints);
+							endpoint_.logs = endpoint_.logs.splice(0, endpoint_.logs.length - config.logsMaxDatapoints);
 						if(config.verbose) {
 							if(endpointStatus.err) {
 								console.log(`\t🔥 ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
