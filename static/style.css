@@ -53,7 +53,7 @@ status-bar {
 		display:block;
 		flex:1 1 0px;
 		width:0px;
-		max-width: 5px;
+		max-width: 7px;
 		height:25px;
 		border-radius:2px;
 		position:relative;
@@ -94,6 +94,14 @@ status-bar {
 
 			font-size:0.9em;
 			z-index:1;
+			& strong {
+				font-weight: 400;
+				font-size: 1.05em;
+			}
+			& em {
+				font-style: normal;
+				opacity: 0.8;
+			}
 		}
 		&:focus {
 			box-shadow:0px 0px 0px 1.5px #d6d7d8;
