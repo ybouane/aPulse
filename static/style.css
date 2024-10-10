@@ -59,7 +59,7 @@ status-bar {
 		position:relative;
 		&[data-status="outage"] {
 			background:#ea1313;
-			box-shadow:0px 0px 3px #ea131355;
+			border: 1px dashed #ffb704;
 		}
 		&[data-status="highly-degraded"] {
 			background:#cc263f;

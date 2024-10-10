@@ -77,7 +77,6 @@ class StatusBar extends HTMLElement {
 	}
 
 	set logs(logs) {
-		console.log(logs);
 		this.innerHTML = '';
 		this.logs_ = logs;
 		let now = Date.now();
