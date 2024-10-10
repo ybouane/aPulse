@@ -85,12 +85,11 @@ class StatusBar extends HTMLElement {
 			let date = now - i * config.interval * 60_000;
 			let point = findClosestPoint(logs, date, config.interval * 60_000/2);
 			const $entry = document.createElement('status-bar-entry');
+			$entry.setAttribute('tabindex', 0);
 			if(point) {
 				$entry.innerHTML = `<div>
 	<strong>${formatDate(point.t)}</strong>
-	<em title="Total Request Time">Total <span class="dur">N/A</span></em>
-	<span title="Time To First Byte">TTFB <span class="ttfb">N/A</span></span>
-	<span title="Download Time">Download Time <span class="dll">N/A</span></span>
+	<em></em>
 </div>`;
 				if(point.err) {
 					$entry.setAttribute('data-status', 'outage');
@@ -104,11 +103,7 @@ class StatusBar extends HTMLElement {
 						$entry.setAttribute('data-status', 'healthy');
 					}
 				}
-				$entry.querySelector('.dur').innerText = point.dur.toFixed(2)+'ms';
-				if(point.ttfb)
-					$entry.querySelector('.ttfb').innerText = point.ttfb.toFixed(2)+'ms';
-				if(point.dll)
-					$entry.querySelector('.dll').innerText = point.dll.toFixed(2)+'ms';
+				$entry.querySelector('em').innerText = point.ttfb.toFixed(2)+'ms';
 			} else {
 				$entry.setAttribute('data-status', 'none');
 				$entry.innerHTML = `<div><strong>No Data</strong></div>`;
