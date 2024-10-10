@@ -20,23 +20,102 @@ const checkContent = async (content, criterion) => {
 		throw new Error('Invalid content check criterion.')
 	}
 };
-const sendTelegramMessage = async (botToken, chatId, text) => {
-	const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+const sendTelegramMessage = async (text) => {
+	const url = `https://api.telegram.org/bot${config.telegram.botToken}/sendMessage`;
 	const response = await fetch(url, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
-			chat_id: chatId,
+			chat_id: config.telegram.chatId,
 			text: text,
 		}),
 	});
 	if (!response.ok) {
-		throw new Error(`Failed to send message: ${response.statusText}`);
+		throw new Error(`[Telegram] Failed to send message: ${response.statusText}`);
 	}
-	const data = await response.json();
-	return data;
+	return await response.json();
 };
-  
+const sendDiscordMessage = async (text) => {
+	const webhookUrl = 'YOUR_DISCORD_WEBHOOK_URL';
+	const response = await fetch(config.discord.webhookUrl, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			content: text
+		})
+	});
+	if (!response.ok) {
+		throw new Error(`[Discord] Failed to send message: ${response.statusText}`);
+	}
+	return await response.json();
+};
+const sendSMSMessage = async (text) => {
+	const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${config.twilio.accountSid}/Messages.json`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Authorization': `Basic ${Buffer.from(`${config.twilio.accountSid}:${config.twilio.accountToken}`).toString('base64')}`
+		},
+		body: new URLSearchParams({
+			To: config.twilio.toNumber,
+			From: config.twilio.twilioNumber,
+			Body: text
+		})
+	});
+	if (!response.ok) {
+		throw new Error(`[Twilio-SMS] Failed to send message: ${response.statusText}`);
+	}
+	return await response.json();
+};
+const sendSlackMessage = async (text) => {
+	const url = 'https://slack.com/api/chat.postMessage';
+	const response = await fetch(url, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${config.slack.botToken}`
+		},
+		body: JSON.stringify({
+			channel: config.slack.channelId,
+			text: text,
+		})
+	});
+	if (!response.ok) {
+		throw new Error(`[Slack] Failed to send message: ${response.statusText}`);
+	}
+	return await response.json();
+};
+const sendEmailMessage = async (text) => {
+	const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+		method: 'POST',
+		headers: {
+			'Authorization': `Bearer ${config.sendgrid.apiKey}`,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			personalizations: [{ to: [{ email: config.sendgrid.toEmail }] }],
+			from: { email: config.sendgrid.toFromEmail },
+			subject: "Pulse — Server Status Notification",
+			content: [{ type: "text/plain", value: text }]
+		})
+	});
+	if (!response.ok) {
+		throw new Error(`[SendGrid-Email] Failed to send message: ${response.statusText}`);
+	}
+	return await response.json();
+};
+const sendNotification = async (message) => {
+	if(config.telegram?.botToken && config.telegram?.chatId)
+		await sendTelegramMessage(message);
+	if(config.slack?.botToken && config.slack?.channelId)
+		await sendSlackMessage(message);
+	if(config.discord?.webhookUrl)
+		await sendDiscordMessage(message);
+	if(config.twilio?.accountSid && config.twilio?.accountToken && config.twilio?.toNumber && config.twilio?.twilioNumber)
+		await sendSMSMessage(message);
+	if(config.sendgrid?.apiKey && config.sendgrid?.toEmail && config.sendgrid?.toFromEmail)
+		await sendEmailMessage(message);
+}
 
 while(true) {
 	config.verbose && console.log('🔄 Pulse');
@@ -149,14 +228,12 @@ while(true) {
 								console.log(`\t🔥 ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
 								console.log(`\t→ ${endpointStatus.err}`);
 								try {
-									if(config.telegram?.botToken && config.telegram?.chatId) {
-										/*await*/ sendTelegramMessage(config.telegram.botToken, config.telegram.chatId,
-											`🔥 ERROR\n`+
-											`${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]\n`+
-											`→ ${endpointStatus.err}`+
-											`\n→ ${endpoint.link || endpoint.url}\n`
-										);
-									}
+									/*await*/ sendNotification( // Don't await to prevent blocking/delaying next pulse
+										`🔥 ERROR\n`+
+										`${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]\n`+
+										`→ ${endpointStatus.err}`+
+										`\n→ ${endpoint.link || endpoint.url}\n`
+									);
 								} catch(e) {console.error(e);}
 							} else {
 								let emoji = '🟢';
