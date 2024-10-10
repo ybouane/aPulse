@@ -193,7 +193,7 @@ while(true) {
 						if(!endpoint.validStatus && !response.ok) {
 							endpointStatus.err = `HTTP Status ${response.status}: ${response.statusText}`;
 							continue;
-						} else if((Array.isArray(endpoint.validStatus) && !endpoint.validStatus.includes(response.status)) || (!Array.isArray(endpoint.validStatus) && endpoint.validStatus!=response.status)) {
+						} else if(endpoint.validStatus && ((Array.isArray(endpoint.validStatus) && !endpoint.validStatus.includes(response.status)) || (!Array.isArray(endpoint.validStatus) && endpoint.validStatus!=response.status))) {
 							endpointStatus.err = `HTTP Status ${response.status}: ${response.statusText}`;
 							continue;
 						}
@@ -222,7 +222,7 @@ while(true) {
 						if(endpoint_.logs.length > config.logsMaxDatapoints) // Remove old datapoints
 							endpoint_.logs = endpoint_.logs.splice(0, endpoint_.logs.length - config.logsMaxDatapoints);
 						if(endpointStatus.err) {
-							endpoint.consecutiveErrors++;
+							endpoint.consecutiveErrors = (endpoint.consecutiveErrors || 0) + 1;
 							endpoint.consecutiveHighLatency = 0;
 							config.verbose && console.log(`\t🔥 ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
 							config.verbose && console.log(`\t→ ${endpointStatus.err}`);
@@ -241,26 +241,29 @@ while(true) {
 							let emoji = '🟢';
 							if(endpointStatus.ttfb>config.responseTimeWarning) {
 								emoji = '🟥';
-								endpoint.consecutiveHighLatency++;
+								endpoint.consecutiveHighLatency = (endpoint.consecutiveHighLatency || 0) + 1;
 							} else {
 								endpoint.consecutiveHighLatency = 0;
 								if(endpointStatus.ttfb>config.responseTimeGood)
 									emoji = '🔶';
 							}
 							config.verbose && console.log(`\t${emoji} ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
-							if(endpoint.consecutiveHighLatency>=config.consecutiveHighLatencyNotify) {
-								/*await*/ sendNotification( // Don't await to prevent blocking/delaying next pulse
-									`🟥 High Latency\n`+
-									`${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]\n`+
-									`\n→ ${endpoint.link || endpoint.url}\n`
-								);
-							}
+							try {
+								if(endpoint.consecutiveHighLatency>=config.consecutiveHighLatencyNotify) {
+									/*await*/ sendNotification( // Don't await to prevent blocking/delaying next pulse
+										`🟥 High Latency\n`+
+										`${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]\n`+
+										`\n→ ${endpoint.link || endpoint.url}\n`
+									);
+								}
+							} catch(e) {console.error(e);}
 						}
 					}
 				}
 			} catch(e) {
 				console.error(e);
 			}
+			config.verbose && console.log(' ');//New line
 		}
 		await fs.writeFile(statusFile, JSON.stringify(status, undefined, config.readableStatusJson?2:undefined));
 	} catch(e) {
