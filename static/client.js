@@ -9,7 +9,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 			const status = await response.json();
 			console.log(status);
 			for (let [siteId, endpointIds] of status.ui) {
-				let site = status[siteId];
+				let site = status.sites[siteId];
+				if(!site)
+					continue;
 
 				let $site = document.createElement('div');
 				$site.classList.add('site');
@@ -24,6 +26,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 				for (let endpointId of endpointIds) {
 					let endpoint = site.endpoints[endpointId];
+					if(!endpoint)
+							continue;
 					let $endpoint = document.createElement('div');
 					$endpoint.classList.add('endpoint');
 
