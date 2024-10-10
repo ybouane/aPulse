@@ -6,6 +6,10 @@ export default {
 	timeout				: 5000, // In milliseconds, requests will be aborted above this. (Do not )
 	readableStatusJson	: true, // Format status.json to be human readable
 	logsMaxDatapoints	: 200, // Maximum datapoints history to keep (per endpoint)
+	telegram			: {
+		botToken	: '',
+		chatId		: '',
+	},
 	sites				: [
 		{
 			id				: 'google', // optional
