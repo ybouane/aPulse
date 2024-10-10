@@ -8,8 +8,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 				throw new Error(`Error fetching status.json: ${response.statusText}`);
 			}
 			const status = await response.json();
+			$main.innerHTML = '';
 			config = status.config;
-			console.log(status);
 			for (let [siteId, endpointIds] of status.ui) {
 				let site = status.sites[siteId];
 				if(!site)
@@ -74,12 +74,11 @@ const findClosestPoint = (logs, t, maxDistance=Infinity) => {
 class StatusBar extends HTMLElement {
 	constructor() {
 		super();
-		this.attachShadow({ mode: 'open' });
 	}
 
 	set logs(logs) {
 		console.log(logs);
-		this.shadowRoot.innerHTML = '';
+		this.innerHTML = '';
 		this.logs_ = logs;
 		let now = Date.now();
 		for(let i=config.nDataPoints;i>0;i--) {
@@ -114,7 +113,7 @@ class StatusBar extends HTMLElement {
 				$entry.setAttribute('data-status', 'none');
 				$entry.innerHTML = `<div><strong>No Data</strong></div>`;
 			}
-			this.shadowRoot.append($entry);
+			this.append($entry);
 			
 		}
 	}
