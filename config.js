@@ -1,6 +1,6 @@
 export default {
 	verbose				: true,
-	interval			: 15, // In minutes
+	nDataPoints			: 90,
 	responseTimeGood	: 300, // In milliseconds, this and below will be green
 	responseTimeWarning	: 600, // In milliseconds, above this will be red
 	timeout				: 5000, // In milliseconds, requests will be aborted above this. (Do not )

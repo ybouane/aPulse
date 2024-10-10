@@ -34,6 +34,7 @@ while(true) {
 		status.lastPulse = startPulse;
 		status.config = {
 			interval				: config.interval,
+			nDataPoints				: config.nDataPoints,
 			responseTimeGood		: config.responseTimeGood,
 			responseTimeWarning		: config.responseTimeWarning,
 		};
