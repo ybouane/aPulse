@@ -5,19 +5,15 @@ const statusFile = './static/status.json';
 
 const delay  = async t=>new Promise(r=>setTimeout(r, t));
 const handlize = s=>s.toLowerCase().replace(/[^a-z0-9]/, ' ').trim().replace(/\s{2,}/g, '-');
-const checkContent = async (content, criterion) => {
+const checkContent = async (content, criterion, negate) => {
 	if(typeof criterion=='string') {
-		return content.includes(criterion);
+		return content.includes(criterion)!=negate;
 	} else if(Array.isArray(criterion)) {
-		return criterion.some(c=>content.includes(c));
+		return criterion[negate?'some':'every'](c=>content.includes(c))!=negate;
 	} else if(criterion instanceof RegExp) {
-		return !!content.match(criterion);
+		return (!!content.match(criterion))!=negate;
 	} else if(typeof criterion=='function') {
-		if(criterion.constructor.name == 'AsyncFunction') {
-			return !!criterion(content);
-		} else {
-			return !!await criterion(content);
-		}
+		return (!!await Promise.resolve(criterion(content)))!=negate;
 	} else {
 		throw new Error('Invalid content check criterion.')
 	}
@@ -207,7 +203,7 @@ while(true) {
 							endpointStatus.err = '"mustFind" check failed';
 							continue;
 						}
-						if(endpoint.mustNotFind && await checkContent(content, endpoint.mustNotFind)) {
+						if(endpoint.mustNotFind && !await checkContent(content, endpoint.mustNotFind, true)) {
 							endpointStatus.err = '"mustNotFind" check failed';
 							continue;
 						}
