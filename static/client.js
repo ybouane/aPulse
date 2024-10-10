@@ -1,3 +1,4 @@
+let config;
 document.addEventListener("DOMContentLoaded", async () => {
 	let $main = document.querySelector('main');
 	const refreshStatus = async () => {
@@ -7,6 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				throw new Error(`Error fetching status.json: ${response.statusText}`);
 			}
 			const status = await response.json();
+			config = status.config;
 			console.log(status);
 			for (let [siteId, endpointIds] of status.ui) {
 				let site = status.sites[siteId];
