@@ -26,6 +26,8 @@ export default {
 		toEmail			: '',
 		toFromEmail		: '',
 	},
+	consecutiveErrorsNotify			: 1,
+	consecutiveHighLatencyNotify	: 3,
 	sites				: [
 		{
 			id				: 'google', // optional
@@ -34,15 +36,15 @@ export default {
 				{
 					id				: 'homepage', // optional
 					name			: 'Homepage',
-					link			: 'https://www.google.com', // optional
+					link			: 'https://www.google.com', // optional (for notifications and dashboard only), [defaults to endpoint.url]
 					url				: 'https://www.google.com',
 					request			: { // fetch options
 						method: 'GET',
 					},
 					mustFind		: 'Feeling Lucky', // String | Regex | Function | AsyncFunction
-					mustNotFind		: /Page not found/i,
-					customCheck		: (content, response)=>{return true;},
-					validStatus		: [200],
+					mustNotFind		: /Page not found/i, // String | Regex | Function | AsyncFunction
+					customCheck		: async (content, response)=>{return true;}, // Function | AsyncFunction -> Run your own custom checks return false in case of errors
+					validStatus		: [200], // Which http status should be considered non errors [defaults to 200-299]
 				}
 			]
 		}
