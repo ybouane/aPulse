@@ -223,25 +223,39 @@ while(true) {
 						endpoint_.logs.push(endpointStatus);
 						if(endpoint_.logs.length > config.logsMaxDatapoints) // Remove old datapoints
 							endpoint_.logs = endpoint_.logs.splice(0, endpoint_.logs.length - config.logsMaxDatapoints);
-						if(config.verbose) {
-							if(endpointStatus.err) {
-								console.log(`\t🔥 ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
-								console.log(`\t→ ${endpointStatus.err}`);
-								try {
+						if(endpointStatus.err) {
+							endpoint.consecutiveErrors++;
+							endpoint.consecutiveHighLatency = 0;
+							config.verbose && console.log(`\t🔥 ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
+							config.verbose && console.log(`\t→ ${endpointStatus.err}`);
+							try {
+								if(endpoint.consecutiveErrors>=config.consecutiveErrorsNotify) {
 									/*await*/ sendNotification( // Don't await to prevent blocking/delaying next pulse
 										`🔥 ERROR\n`+
 										`${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]\n`+
 										`→ ${endpointStatus.err}`+
 										`\n→ ${endpoint.link || endpoint.url}\n`
 									);
-								} catch(e) {console.error(e);}
+								}
+							} catch(e) {console.error(e);}
+						} else {
+							endpoint.consecutiveErrors = 0;
+							let emoji = '🟢';
+							if(endpointStatus.ttfb>config.responseTimeWarning) {
+								emoji = '🟥';
+								endpoint.consecutiveHighLatency++;
 							} else {
-								let emoji = '🟢';
-								if(endpointStatus.ttfb>config.responseTimeWarning)
-									emoji = '🟥';
-								else if(endpointStatus.ttfb>config.responseTimeGood)
+								endpoint.consecutiveHighLatency = 0;
+								if(endpointStatus.ttfb>config.responseTimeGood)
 									emoji = '🔶';
-								console.log(`\t${emoji} ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
+							}
+							config.verbose && console.log(`\t${emoji} ${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]`);
+							if(endpoint.consecutiveHighLatency>=config.consecutiveHighLatencyNotify) {
+								/*await*/ sendNotification( // Don't await to prevent blocking/delaying next pulse
+									`🟥 High Latency\n`+
+									`${site.name || siteId} — ${endpoint.name || endpointId} [${endpointStatus.ttfb.toFixed(2)}ms]\n`+
+									`\n→ ${endpoint.link || endpoint.url}\n`
+								);
 							}
 						}
 					}
