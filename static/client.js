@@ -51,3 +51,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 	refreshStatus();
 	setInterval(refreshStatus, 60_000); // Refresh every minute
 });
+const formatDate = (date) => new Intl.DateTimeFormat('en-US', {
+	month: 'long',
+	day: 'numeric',
+	year: 'numeric',
+	hour: 'numeric',
+	minute: '2-digit',
+	hour12: true
+}).format(date);
+
+const findClosestPoint = (logs, t, maxDistance=Infinity) => {
+	let best;
+	for(let log of logs) {
+		let d = Math.abs(log.t-t);
+		if(d <= maxDistance && (!best || d<Math.abs(best.t-t))) {
+			best = log;
+		}
+	}
+	return best;
+}
