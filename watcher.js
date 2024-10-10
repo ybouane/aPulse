@@ -1,5 +1,16 @@
 import config from './config.js';
 import fs from 'fs/promises';
+import {watchFile} from 'fs';
+let config = (await import('./config.js')).default;
+
+watchFile('./config.js', async ()=>{ // Dynamically reload config and watch it for changes.
+	try {
+		config = (await import('./config.js')).default;
+		console.log('Reloaded config file.')
+	} catch(e) {
+		console.error(e);
+	}
+});
 
 const statusFile = './static/status.json';
 
