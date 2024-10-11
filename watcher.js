@@ -4,7 +4,7 @@ let config = (await import('./config.js')).default;
 
 watchFile('./config.js', async ()=>{ // Dynamically reload config and watch it for changes.
 	try {
-		config = (await import('./config.js')).default;
+		config = (await import('./config.js?refresh='+Date.now())).default;
 		console.log('Reloaded config file.')
 	} catch(e) {
 		console.error(e);
