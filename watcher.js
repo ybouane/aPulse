@@ -14,7 +14,7 @@ watchFile('./config.js', async ()=>{ // Dynamically reload config and watch it f
 const statusFile = './static/status.json';
 
 const delay  = async t=>new Promise(r=>setTimeout(r, t));
-const handlize = s=>s.toLowerCase().replace(/[^a-z0-9]/, ' ').trim().replace(/\s{2,}/g, '-');
+const handlize = s=>s.toLowerCase().replace(/[^a-z0-9]/, ' ').trim().replace(/\s+/g, '-');
 const checkContent = async (content, criterion, negate) => {
 	if(typeof criterion=='string') {
 		return content.includes(criterion)!=negate;
