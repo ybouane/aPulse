@@ -1,42 +1,45 @@
 export default {
-	verbose				: true,
-	nDataPoints			: 90,
+	interval			: 15, // Interval in minutes between each pulse
+	nDataPoints			: 90, // Number of datapoints to display on the dashboard
 	responseTimeGood	: 300, // In milliseconds, this and below will be green
 	responseTimeWarning	: 600, // In milliseconds, above this will be red
-	timeout				: 5000, // In milliseconds, requests will be aborted above this. (Do not )
+	timeout				: 5000, // In milliseconds, requests will be aborted above this
+	verbose				: true, // Whether or not to output pulse messages in the console
 	readableStatusJson	: true, // Format status.json to be human readable
 	logsMaxDatapoints	: 200, // Maximum datapoints history to keep (per endpoint)
-	telegram			: {
+	telegram			: { // optional, tokens to send notifications through telegram
+		botToken	: '', // Contact @BotFather on telegram to create a bot
+		chatId		: '',// Send a message to the bot, then visit https://api.telegram.org/bot<token>/getUpdates to get the chatId
 	},
-	slack				: {
+	slack				: { // optional, tokens to send notifications through slack
 		botToken	 : '',
 		channelId	: '',
 	},
-	discord				: {
+	discord				: { // optional, tokens to send notifications through discord
 		webhookUrl	: '',
 	},
-	twilio				: {
+	twilio				: { // optional, tokens to send notifications through twilio (SMS)
 		accountSid		: '',
 		accountToken	: '',
 		toNumber		: '',
 		twilioNumber	: '',
 	},
-	sendgrid				: {
+	sendgrid				: { // optional, tokens to send notifications through sendgrid (Email)
 		apiKey			: '',
 		toEmail			: '',
 		toFromEmail		: '',
 	},
-	consecutiveErrorsNotify			: 1,
-	consecutiveHighLatencyNotify	: 3,
-	sites				: [
+	consecutiveErrorsNotify			: 1, // After how many consecutive Errors events should we send a notification
+	consecutiveHighLatencyNotify	: 3, // After how many consecutive High latency events should we send a notification
+	sites				: [ // List of sites to monitor
 		{
 			id				: 'google', // optional
 			name			: 'Google',
-			endpoints		: [
+			endpoints		: [ // Each site is a bunch of endpoints that can be tested
 				{
 					id				: 'homepage', // optional
 					name			: 'Homepage', // optional
-					link			: 'https://www.google.com', // optional, for notifications and dashboard only, [defaults to endpoint.url], can be disabled by settig it to false
+					link			: 'https://www.google.com', // optional, for notifications and dashboard only, [defaults to endpoint.url], can be disabled by setting it to false
 					url				: 'https://www.google.com', // required
 					request			: { // optional, fetch options
 						method: 'GET',

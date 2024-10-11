@@ -20,11 +20,12 @@ https://pulse.ybouane.com
 Pulse can be configured through the "config.js" file and it looks like this
 ```javascript
 export default {
-	verbose				: true,
+	interval			: 15, // Interval in minutes between each pulse
 	nDataPoints			: 90, // Number of datapoints to display on the dashboard
 	responseTimeGood	: 300, // In milliseconds, this and below will be green
 	responseTimeWarning	: 600, // In milliseconds, above this will be red
-	timeout				: 5000, // In milliseconds, requests will be aborted above this. (Do not )
+	timeout				: 5000, // In milliseconds, requests will be aborted above this
+	verbose				: true, // Whether or not to output pulse messages in the console
 	readableStatusJson	: true, // Format status.json to be human readable
 	logsMaxDatapoints	: 200, // Maximum datapoints history to keep (per endpoint)
 	telegram			: {}, // optional, tokens to send notifications through telegram
@@ -42,7 +43,7 @@ export default {
 				{
 					id				: 'homepage', // optional
 					name			: 'Homepage', // optional
-					link			: 'https://www.google.com', // optional, for notifications and dashboard only, [defaults to endpoint.url], can be disabled by settig it to false
+					link			: 'https://www.google.com', // optional, for notifications and dashboard only, [defaults to endpoint.url], can be disabled by setting it to false
 					url				: 'https://www.google.com', // required
 					request			: { // optional, fetch options
 						method: 'GET',
