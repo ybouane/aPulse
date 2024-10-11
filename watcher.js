@@ -1,5 +1,4 @@
-import fs from 'fs/promises';
-import {watchFile} from 'fs';
+import {promises as fs, watchFile} from 'fs';
 let config = (await import('./config.js')).default;
 
 watchFile('./config.js', async ()=>{ // Dynamically reload config and watch it for changes.
