@@ -1,0 +1,6 @@
+{
+	"apps": [{
+		"name"			: "Pulse",
+		"script"		: "./watcher.js"
+	}]
+}
