@@ -8,9 +8,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node watcher.js"
   },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "fastify": "^5.0.0"
-  }
+  "author": "ybouane",
+  "license": "Apache-2.0"
 }
