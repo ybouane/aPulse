@@ -1,8 +1,8 @@
-# pulse
+# aPulse
 A one-file NodeJS server status monitoring/notification tool.
 
 # Demo
-https://pulse.ybouane.com
+https://apulse.ybouane.com
 
 # Features
 - Highly and easily configurable, edit the config.js file to add test endpoints and configure the watcher
@@ -17,7 +17,7 @@ https://pulse.ybouane.com
 
 
 # How does it work
-Pulse can be configured through the "config.js" file and it looks like this
+aPulse can be configured through the "config.js" file and it looks like this
 ```javascript
 export default {
 	interval			: 15, // Interval in minutes between each pulse
@@ -61,10 +61,10 @@ export default {
 
 # Installation
 Clone the repo:
-`git clone https://github.com/ybouane/pulse.git`
+`git clone https://github.com/ybouane/aPulse.git`
 
 Either run the watcher.js script directly (you need to keep it running in the background)
-`cd pulse`
+`cd aPulse`
 `node watcher.js`
 
 Or use a tool like PM2 (prefered method):

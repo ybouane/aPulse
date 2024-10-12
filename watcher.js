@@ -102,7 +102,7 @@ const sendEmailMessage = async (text) => {
 		body: JSON.stringify({
 			personalizations: [{ to: [{ email: config.sendgrid.toEmail }] }],
 			from: { email: config.sendgrid.toFromEmail },
-			subject: "Pulse — Server Status Notification",
+			subject: "aPulse — Server Status Notification",
 			content: [{ type: "text/plain", value: text }]
 		})
 	});

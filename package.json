@@ -1,12 +1,12 @@
 {
-  "name": "pulse",
+  "name": "aPulse",
   "version": "1.0.0",
   "type": "module",
-  "description": "A one-file NodeJS server status monitoring tool.",
-  "main": "server.js",
+  "description": "A one-file NodeJS server status monitoring/notification tool.",
+  "main": "watcher.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node watcher.js"
   },
   "author": "",
   "license": "ISC",
