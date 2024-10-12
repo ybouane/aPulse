@@ -63,17 +63,31 @@ export default {
 
 # Installation
 Clone the repo:
-`git clone https://github.com/ybouane/aPulse.git`
+```shell
+git clone https://github.com/ybouane/aPulse.git
+```
 
 Either run the watcher.js script directly (you need to keep it running in the background)
-`cd aPulse`
-`node watcher.js`
+```shell
+cd aPulse
+```
+```shell
+node watcher.js
+```
 
 Or use a tool like PM2 (prefered method):
-`npm install pm2 -g`
+```shell
+npm install pm2 -g
+```
 Start watcher.json
-`pm2 start pm2.json`
+```shell
+pm2 start pm2.json
+```
 Configure pm2 to automatically start during startup
-`pm2 startup`
+```shell
+pm2 startup
+```
 Save current pm2 processes list
-`pm2 save`
+```shell
+pm2 save
+```
