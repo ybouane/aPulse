@@ -55,6 +55,11 @@ header {
 	&>h1 {
 		font-weight:600;
 	}
+	& img {
+		width: 50px;
+		vertical-align: middle;
+		margin-right: 8px;
+	}
 }
 
 error-notice {
