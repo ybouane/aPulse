@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let $main = document.querySelector('main');
 	const refreshStatus = async () => {
 		try {
-			const response = await fetch('./status.json');
+			const response = await fetch('./status.json', {cache: "no-cache"});
 			if (!response.ok) {
 				throw new Error(`Error fetching status.json: ${response.statusText}`);
 			}
