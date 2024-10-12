@@ -2,7 +2,9 @@
 A one-file NodeJS server status monitoring/notification tool.
 
 # Demo
-https://apulse.ybouane.com
+Visit https://apulse.ybouane.com for a demo!
+
+![aPulse — Server Status Open Source NodeJS Tool](screenshot.png "aPulse — Server Status Open Source NodeJS Tool")
 
 # Features
 - Highly and easily configurable, edit the config.js file to add test endpoints and configure the watcher
