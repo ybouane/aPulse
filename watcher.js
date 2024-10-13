@@ -230,7 +230,7 @@ while(true) {
 					} finally {
 						endpoint_.logs.push(endpointStatus);
 						if(endpoint_.logs.length > config.logsMaxDatapoints) // Remove old datapoints
-							endpoint_.logs = endpoint_.logs.splice(0, endpoint_.logs.length - config.logsMaxDatapoints);
+							endpoint_.logs.splice(0, endpoint_.logs.length - config.logsMaxDatapoints);
 						if(endpointStatus.err) {
 							endpoint.consecutiveErrors = (endpoint.consecutiveErrors || 0) + 1;
 							endpoint.consecutiveHighLatency = 0;
