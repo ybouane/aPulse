@@ -91,3 +91,24 @@ Save current pm2 processes list
 ```shell
 pm2 save
 ```
+
+### Serving the status page
+The `watcher.js` script only takes care of running the status checks and updates the `status.json` file in the `static/` folder. If you want to view the final result, you simply need to serve the files in the `static/` folder. You can use Nginx with a config like:
+```nginx
+# Pulse
+server {
+	root /var/www/apulse/static/;
+	index index.html;
+	server_name apulse.ybouane.com;
+	location /favicon.ico {
+		return 301 "/favicon.png";
+	}
+	listen 80;
+}
+```
+
+Or use any other tool to serve those files like the npm http-server package:
+```shell
+cd static
+npx http-server -o ./
+```
